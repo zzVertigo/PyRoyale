@@ -25,7 +25,7 @@ class Networking(Thread):
 		self.client.bind((self.address, self.port))
 		self.client.listen(10)
 
-		print('Server is listening on %s:%s', self.settings["Address"], self.settings["Port"])
+		print('Server is listening on %s:%s' % (self.settings["Address"], self.settings["Port"]))
 
 		print('-----------------------')
 
