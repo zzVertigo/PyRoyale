@@ -5,13 +5,11 @@ import binascii
 import json
 
 from threading import *
-from blessings import *
-from Networking import *
 
-Term = Terminal()
+clientSocket = socket.socket()
 
 class Networking(Thread):
-	def __init__(self, clientSocket, args):
+	def __init__(self, args):
 		Thread.__init__(self)
 
 		self.settings = json.load(open('Settings.json'))
@@ -25,7 +23,7 @@ class Networking(Thread):
 		self.client.bind((self.address, self.port))
 		self.client.listen(10)
 
-		print('Server is listening on %s:%s' % (self.settings["Address"], self.settings["Port"]))
+		print('Server is listening on %s:%s' % (self.address, self.port))
 
 		print('-----------------------')
 
@@ -34,8 +32,7 @@ class Networking(Thread):
 
 			print('New connection from {}'.format(address[0]))
 
-			clientThread = ClientThread(client, self.args.debug)
-			clientThread.start()
+			clientThread = ClientThread(self.client, self.args.debug).start()
 
 class ClientThread(Thread):
 	def __init__(self, clientSocket, debug):
