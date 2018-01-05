@@ -1,0 +1,8 @@
+{
+	"Address": "0.0.0.0",
+	"Port": 9567,
+
+	"StartingGold": 999999,
+	"StartingElixir": 999999,
+	"StartingGems": 999999
+}
