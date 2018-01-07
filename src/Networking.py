@@ -6,6 +6,8 @@ import binascii
 import json
 
 from threading import *
+from CryptoRC4.Crypto import CryptoRc4
+from Packets.Factory import *
 
 
 clientSocket = socket.socket()
@@ -25,26 +27,26 @@ class Networking(Thread):
 
     def run(self):
         self.client.bind((self.address, self.port))
-        self.client.listen(10)
 
         print('Server is listening on {}:{}'.format(self.address, self.port).center(width))
 
         print('{}'.format('-' * (width // 2)).center(width))
 
         while True:
+            self.client.listen(5)
             client, address = self.client.accept()
 
             print('New connection from {}'.format(address[0]))
-
             clientThread = ClientThread(client, self.args.debug).start()
 
 
 class ClientThread(Thread):
-    def __init__(self, clientSocket, debug):
+    def __init__(self, client, debug):
         Thread.__init__(self)
 
-        self.client = clientSocket
+        self.client = client
         self.debug  = debug
+        self.crypto = CryptoRc4()
 
     def recvall(self, size):
         data = []
@@ -66,35 +68,29 @@ class ClientThread(Thread):
             version  = int.from_bytes(header[5:], 'big')
             data     = self.recvall(length)
 
-            '''
-            if len(header) >= 7:
-                print('Buffer is valid')
-            else:
-                print('Buffer is not valid')
-            '''
             if len(header) >= 7:
                 if length == len(data):
                     if self.debug:
-                        print('{} received'.format(packetid))
+                        print('[*] {} received'.format(packetid))
+
+                    try:
+                        decrypted = self.crypto.decrypt(data)
+                        if packetid in availablePackets:
+
+                            Message = availablePackets[packetid](decrypted)
+
+                            Message.decode()
+                            Message.process()
+
+                        else:
+                            if self.debug:
+                                print('[*] {} not handled'.format(packetid))
+
+                    except:
+                        if self.debug:
+                            print('[*] Error while decrypting / handling {}'.format(packetid))
 
             else:
                 if self.debug:
-                    print('Received an invalid packet from client')
+                    print('[*] Received an invalid packet from client')
                 self.client.close()
-
-            '''
-            packetid = int.from_bytes(header[0:2], 'big')
-            length = int.from_bytes(header[2:5], 'big')
-            version = int.from_bytes(header[5:6], 'big')
-
-            payload = recvall(self.client, length)
-
-            if len(header) >= 7:
-                if len(length) == len(payload):
-                    if self.debug:
-                        print('Received VALID packet!')
-            else:
-                if self.debug:
-                    print('Invalid packet received from client!')
-                self.client.close()
-            '''
