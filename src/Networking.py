@@ -4,10 +4,11 @@ import time
 import os
 import binascii
 import json
+import traceback
 
 from threading import *
-from CryptoRC4.Crypto import CryptoRc4
 from Packets.Factory import *
+from Logic.Device import Device
 
 
 clientSocket = socket.socket()
@@ -45,8 +46,8 @@ class ClientThread(Thread):
         Thread.__init__(self)
 
         self.client = client
+        self.device = Device(self.client)
         self.debug  = debug
-        self.crypto = CryptoRc4()
 
     def recvall(self, size):
         data = []
@@ -74,10 +75,10 @@ class ClientThread(Thread):
                         print('[*] {} received'.format(packetid))
 
                     try:
-                        decrypted = self.crypto.decrypt(data)
+                        decrypted = self.device.decrypt(data)
                         if packetid in availablePackets:
 
-                            Message = availablePackets[packetid](decrypted)
+                            Message = availablePackets[packetid](decrypted, self.device)
 
                             Message.decode()
                             Message.process()
@@ -89,7 +90,7 @@ class ClientThread(Thread):
                     except:
                         if self.debug:
                             print('[*] Error while decrypting / handling {}'.format(packetid))
-
+                            traceback.print_exc()
             else:
                 if self.debug:
                     print('[*] Received an invalid packet from client')
