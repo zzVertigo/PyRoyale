@@ -48,6 +48,13 @@ class Writer:
         else:
             self.writeInt(2**32 - 1)
 
+    def writeHexa(self, data):
+        if data:
+            if data.startswith('0x'):
+                data = data[2:]
+
+            self.buffer += bytes.fromhex(''.join(data.split()).replace('-', ''))
+
     def Send(self):
 
         self.encode()

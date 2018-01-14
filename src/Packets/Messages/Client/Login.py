@@ -2,7 +2,9 @@
 
 from Utils.Reader import ByteStream
 from Packets.Messages.Server.LoginOk import LoginOk
+from Packets.Messages.Server.OwnHomeData import OwnHomeData
 from Logic.Player import Player
+
 
 class Login(ByteStream):
 
@@ -38,4 +40,5 @@ class Login(ByteStream):
 
     def process(self):
         LoginOk(self.device).Send()
+        OwnHomeData(self.device).Send()
         # Todo : Process stuff (implement OHD)

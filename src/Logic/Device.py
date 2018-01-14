@@ -3,10 +3,11 @@ from CryptoRC4.Crypto import CryptoRc4
 
 
 class Device:
+
     AndroidID = None
     DeviceModel = None
     OpenUDID = None
-    OSVersion = None  
+    OSVersion = None
     IsAndroid = False
     Language = None
 

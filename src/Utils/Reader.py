@@ -10,6 +10,13 @@ class ByteStream(BufferedReader):
     def ReadByte(self):
         return int.from_bytes(self.read(1), "big")
 
+    def ReadBool(self):
+        if self.ReadByte:
+            return True
+
+        else:
+            return False
+
     def ReadSCID(self):
         hi = self.read_rrsint32()
         lo = 0
