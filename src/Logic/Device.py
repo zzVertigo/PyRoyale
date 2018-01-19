@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import traceback
+
 from CryptoRC4.Crypto import CryptoRc4
+from Packets.Factory import *
 
 
 class Device:
@@ -11,7 +14,8 @@ class Device:
     IsAndroid = False
     Language = None
 
-    def __init__(self, socket):
+    def __init__(self, socket=None):
+
         self.socket = socket
         self.crypto = CryptoRc4()
 
@@ -26,8 +30,33 @@ class Device:
         else:
             packetVersion = (0).to_bytes(2, 'big')
 
-        self.socket.send(packetID + len(encrypted).to_bytes(3, 'big') + packetVersion + encrypted)
+        if self.socket is None:
+            self.transport.write(packetID + len(encrypted).to_bytes(3, 'big') + packetVersion + encrypted)
+
+        else:
+            self.socket.send(packetID + len(encrypted).to_bytes(3, 'big') + packetVersion + encrypted)
+
         print('[*] {} sent'.format(ID))
 
     def decrypt(self, data):
         return self.crypto.decrypt(data)
+
+    def processPacket(self, packetID, payload):
+
+        print('[*] {} received'.format(packetID))
+
+        try:
+            decrypted = self.decrypt(payload)
+
+            if packetID in availablePackets:
+
+                Message = availablePackets[packetID](decrypted, self)
+                Message.decode()
+                Message.process()
+
+            else:
+                print('[*] {} not handled'.format(packetID))
+
+        except:
+            print('[*] Error while decrypting / handling {}'.format(packetID))
+            traceback.print_exc()

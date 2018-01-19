@@ -11,10 +11,6 @@ from Packets.Factory import *
 from Logic.Device import Device
 
 
-clientSocket = socket.socket()
-width = os.get_terminal_size().columns
-
-
 class Networking(Thread):
     def __init__(self, args):
         Thread.__init__(self)
@@ -23,10 +19,12 @@ class Networking(Thread):
 
         self.address = self.settings["Address"]
         self.port = self.settings["Port"]
-        self.client = clientSocket
+        self.client = socket.socket()
         self.args = args
 
     def run(self):
+        width = os.get_terminal_size().columns
+
         self.client.bind((self.address, self.port))
 
         print('Server is listening on {}:{}'.format(self.address, self.port).center(width))
@@ -91,6 +89,8 @@ class ClientThread(Thread):
                         if self.debug:
                             print('[*] Error while decrypting / handling {}'.format(packetid))
                             traceback.print_exc()
+                else:
+                    print('[*] Incorrect Length for packet {} (header length: {}, data length: {})'.format(packetid, length, len(data)))
             else:
                 if self.debug:
                     print('[*] Received an invalid packet from client')
